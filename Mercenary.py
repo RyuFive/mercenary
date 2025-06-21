@@ -142,13 +142,21 @@ def logic(line):
             play_alert_sound()
             break  # Stop checking once one match is found
 
-    for dialogue in MERCENARY_LINES:
-        if dialogue in line:
-            print(f"Matched Mercenary: {dialogue}")
-            notify_toast(dialogue)
-            if app:
-                app.set_state(False)  
-            break  # Stop checking once one match is found
+    if line.startswith("You have entered") and "Hideout" in line:
+        print(f"Matched Hideout: {line.strip()}")
+        notify_toast(line.strip())
+        play_alert_sound()
+        if app:
+            app.set_state(False)  # Disable toggle when entering any hideout
+
+
+    # for dialogue in MERCENARY_LINES:
+    #     if dialogue in line:
+    #         print(f"Matched Mercenary: {dialogue}")
+    #         notify_toast(dialogue)
+    #         if app:
+    #             app.set_state(False)  
+    #         break  # Stop checking once one match is found
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
