@@ -9,7 +9,17 @@ import pygame
 from winotify import Notification
 
 # === CONFIG ===
-FILE_PATH = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Path of Exile\\logs\\client.txt"  # <-- Your full log path
+# Steam and Standalone default log paths
+STEAM_LOG_PATH = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Path of Exile\\logs\\client.txt"
+STANDALONE_LOG_PATH = "C:\\Program Files (x86)\\Grinding Gear Games\\Path of Exile\\logs\\client.txt"
+# Auto-select whichever path exists
+if os.path.exists(STEAM_LOG_PATH):
+    FILE_PATH = STEAM_LOG_PATH
+elif os.path.exists(STANDALONE_LOG_PATH):
+    FILE_PATH = STANDALONE_LOG_PATH
+else:
+    raise FileNotFoundError("Could not find Path of Exile log file in default locations.")
+
 TARGET_LINES = {
     "A Reflecting Mist has manifested nearby.",
     "The Nameless Seer has appeared nearby.",
