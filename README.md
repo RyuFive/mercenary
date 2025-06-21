@@ -15,6 +15,39 @@ It plays a sound, shows a popup, and includes a draggable toggle icon that indic
 
 ---
 
+### 🐍 How to Install Python
+
+1. Go to the official Python download page:  
+   👉 [https://www.python.org/downloads/windows/](https://www.python.org/downloads/windows/)
+
+2. Click **Download Python 3.x.x** for Windows (choose the latest version 3.9 or above)
+
+3. Run the downloaded installer
+
+4. **IMPORTANT:**  
+   ✅ Check the box that says:
+```
+
+\[x] Add Python to PATH
+
+````
+
+5. Click **Install Now**
+
+6. After installation, you can confirm it by opening **Command Prompt** and typing:
+```bash
+python --version
+````
+
+You should see something like:
+
+```
+Python 3.11.8
+```
+
+```
+```
+
 ## 🛠 Installation (Python Script)
 
 1. **Clone or download this repo**
