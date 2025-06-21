@@ -25,12 +25,12 @@ ENABLE_SOUND = True
 ENABLE_ICON = True
 
 # 🔔 Sound file path (MP3 or WAV)
-SOUND_PATH = "alert.mp3"  # Put a short sound file here
+SOUND_PATH = "resources\\alert.mp3"  # Put a short sound file here
 
 app = None  # Will be assigned after GUI setup
 
 class FloatingToggle:
-    def __init__(self, root, icon_on_path, icon_off_path, callback=None, pos_file="position.txt"):
+    def __init__(self, root, icon_on_path, icon_off_path, callback=None, pos_file="resources\\position.txt"):
         self.root = root
         self.state = True
         self.callback = callback
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
     # Create the GUI
     root = tk.Tk()
-    app = FloatingToggle(root, "on.png", "off.png", callback=lambda state: print("Toggled:", state))
+    app = FloatingToggle(root, "resources\\on.png", "resources\\off.png", callback=lambda state: print("Toggled:", state))
 
     # Start log file monitor in a background thread
     threading.Thread(target=tail_file, args=(FILE_PATH,), daemon=True).start()
