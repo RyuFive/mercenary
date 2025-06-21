@@ -8,12 +8,6 @@ import tkinter as tk
 import pygame
 from winotify import Notification
 
-def resource_path(relative_path):
-    """Get absolute path to resource (works for dev and PyInstaller bundle)"""
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)  # type: ignore[attr-defined]
-    return os.path.join(os.path.abspath("."), relative_path)
-
 # === CONFIG ===
 FILE_PATH = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Path of Exile\\logs\\client.txt"  # <-- Your full log path
 TARGET_LINES = {
@@ -31,7 +25,7 @@ ENABLE_SOUND = True
 ENABLE_ICON = True
 
 # 🔔 Sound file path (MP3 or WAV)
-SOUND_PATH = resource_path("alert.mpe")  # Put a short sound file here
+SOUND_PATH = "alert.mp3"  # Put a short sound file here
 
 app = None  # Will be assigned after GUI setup
 
@@ -148,20 +142,27 @@ def logic(line):
             play_alert_sound()
             break  # Stop checking once one match is found
 
-    for dialogue in MERCENARY_LINES:
-        if dialogue in line:
-            print(f"Matched Mercenary: {dialogue}")
-            notify_toast(dialogue)
-            if app:
-                app.set_state(False)  
-            break  # Stop checking once one match is found
+    if line.startswith("You have entered") and "Hideout" in line:
+        print(f"Matched Hideout: {line.strip()}")
+        notify_toast(line.strip())
+        if app:
+            app.set_state(False)  # Disable toggle when entering any hideout
+
+
+    # for dialogue in MERCENARY_LINES:
+    #     if dialogue in line:
+    #         print(f"Matched Mercenary: {dialogue}")
+    #         notify_toast(dialogue)
+    #         if app:
+    #             app.set_state(False)  
+    #         break  # Stop checking once one match is found
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
 
     # Create the GUI
     root = tk.Tk()
-    app = FloatingToggle(root, resource_path("on.png"), resource_path("off.png"), callback=lambda state: print("Toggled:", state))
+    app = FloatingToggle(root, "on.png", "off.png", callback=lambda state: print("Toggled:", state))
 
     # Start log file monitor in a background thread
     threading.Thread(target=tail_file, args=(FILE_PATH,), daemon=True).start()
