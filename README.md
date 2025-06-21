@@ -3,6 +3,8 @@
 A simple Python app that monitors Path of Exile log files and notifies you when special mercenary events occur.  
 It plays a sound, shows a popup, and includes a draggable toggle icon that indicates event status.
 
+- Left click to Toggle Icon
+- Right click to close program
 ---
 
 ## 🔧 Requirements
