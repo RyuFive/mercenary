@@ -45,9 +45,6 @@ You should see something like:
 Python 3.11.8
 ```
 
-```
-```
-
 ## 🛠 Installation (Python Script)
 
 1. **Clone or download this repo**
