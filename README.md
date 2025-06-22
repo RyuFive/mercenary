@@ -86,7 +86,7 @@ Python 3.11.8
 2. Click the green Code button → Download ZIP
 
 3. Extract the new version and replace the old folder
-4. 
+   
 ---
 
 ## 🎵 Resources
