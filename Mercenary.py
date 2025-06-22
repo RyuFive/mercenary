@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 import tkinter as tk
 import pygame
 from winotify import Notification
+import re
 
 # === CONFIG ===
 # Steam and Standalone default log paths
@@ -25,8 +26,12 @@ TARGET_LINES = {
     "The Nameless Seer has appeared nearby.",
 }
 
-MERCENARY_LINES = {
-    "Take your trinket, then. My freedom's worth more",
+MERCENARY_HOUSES = {
+    "Cyaxan",
+    "Azadi",
+    "Keita",
+    "Bardiya",
+    "Keita",
 }
 
 # ✅ Feature toggles
@@ -36,6 +41,7 @@ ENABLE_ICON = True
 
 # 🔔 Sound file path (MP3 or WAV)
 SOUND_PATH = "resources\\alert.mp3"  # Put a short sound file here
+SOUND2_PATH = "resources\\failed.mp3"  # Optional second sound file
 
 app = None  # Will be assigned after GUI setup
 
@@ -71,6 +77,9 @@ class FloatingToggle:
     def toggle(self):
         self.set_state(not self.state)
 
+    def get_state(self):
+        return self.state
+    
     def set_state(self, new_state: bool):
         self.state = new_state
         self.button.configure(image=self.icon_on if self.state else self.icon_off)
@@ -133,6 +142,16 @@ def play_alert_sound():
         except Exception as e:
             print(f"Sound error: {e}")
 
+def play_failed_sound():
+    if ENABLE_SOUND and os.path.exists(SOUND2_PATH):
+        try:
+            pygame.init()
+            pygame.mixer.init()
+            pygame.mixer.music.load(SOUND2_PATH)
+            pygame.mixer.music.play()
+        except Exception as e:
+            print(f"Sound error: {e}")
+
 def tail_file(filepath):
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
         f.seek(0, os.SEEK_END)
@@ -143,8 +162,57 @@ def tail_file(filepath):
                 continue
             logic(line.strip())
 
+exclude_pattern = re.compile(r'''
+^\[SCENE\]|
+^\[DXC\]|
+^\[InGameAudioManager\]|
+^\[SHADER\]|
+^Got\sInstance\sDetails\sfrom\slogin\sserver$|
+^Doodad\shash:|
+^Tile\shash:|
+^Async\sconnecting\sto\s\S+:\d+$|
+^Connecting\sto\sinstance\sserver\sat\s\S+:\d+$|
+^Connect\stime\sto\sinstance\sserver\swas\s\d+ms$|
+^Generating\slevel\s\d+\sarea\s".+?"\swith\sseed\s\d+$|
+^Client-Safe\sInstance\sID\s=|
+^Joined\sguild\snamed\s.*$|
+^Matching\sobject\sfound\sfor\sInstanceClientActionUpdate,.*$|
+^Client\scouldn't\sexecute\sa\striggered\saction\sfrom\sthe\sserver.*$|
+^Instant/Triggered\sactionwas\sserialized\sto\sthe\sclient.*$|
+^Failed\sto\screate\seffect\sgraph\snode.*$|
+^Precalc*$|
+^Action\sId\s=\s\d+$|
+^action\s*type\s*id\s*=\s*\d+$|
+^action_id:\s*\d+$|
+^skill_instance_id:\s*\d+$|
+^object_id:\s*\d+$|
+^target_id:\s*\d+$|
+^flags:\s*\d+$|
+^object_id\sId\s=\s\d+$|
+^target_id\sId\s=\s\d+$|
+^Detach\sId\s=\s\d+$|
+^Skill\sType\sId\s=\s\d+$|
+^Skill\sInstance\sId\s=\d+$|
+^flags\sId\s=\s\d+$|
+^Steam\sstats\sstored$|
+^Replacing\sawake\sobject\swith\sid\s.*$|
+^:\sTrade\saccepted$
+''', re.VERBOSE)
+
+# Print initial message
+print("Mercenary Monitor started. Monitoring log file:")
+print("------------------------------")
+
 def logic(line):
     global app
+    line = line[line.find(']') + 1:].strip()
+
+    if exclude_pattern.match(line):
+        # app.close_app()  # Close app if excluded line is detected
+        return
+
+    print(repr(line))
+    
     for target in TARGET_LINES:
         if target in line:
             print(f"Matched: {target}")
@@ -152,21 +220,24 @@ def logic(line):
             play_alert_sound()
             break  # Stop checking once one match is found
 
-    if line.startswith("You have entered") and "Hideout" in line:
-        print(f"Matched Hideout: {line.strip()}")
-        notify_toast(line.strip())
-        play_alert_sound()
-        if app:
-            app.set_state(False)  # Disable toggle when entering any hideout
+    if "You have entered" and "Hideout" in line:
+        if "Syndicate" in line:
+            print("Thats not your Hideout, ignoring...")
+        elif app:
+            if app.get_state():
+                play_failed_sound()
+                notify_toast("You didn't defeat the mercenary yet!")
+            app.set_state(True)  # Reset toggle when entering any hideout
 
 
-    # for dialogue in MERCENARY_LINES:
-    #     if dialogue in line:
-    #         print(f"Matched Mercenary: {dialogue}")
-    #         notify_toast(dialogue)
-    #         if app:
-    #             app.set_state(False)  
-    #         break  # Stop checking once one match is found
+    for house in MERCENARY_HOUSES:
+        if house in line:
+            if app:
+                if app.get_state() == False:
+                    break
+                play_alert_sound()
+                app.set_state(False)  
+            break  # Stop checking once one match is found
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
