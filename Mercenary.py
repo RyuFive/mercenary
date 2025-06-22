@@ -181,6 +181,7 @@ exclude_pattern = re.compile(r'''
 ^Instant/Triggered\sactionwas\sserialized\sto\sthe\sclient.*$|
 ^Failed\sto\screate\seffect\sgraph\snode.*$|
 ^Precalc*$|
+^Resyncing\s\d+$|
 ^Action\sId\s=\s\d+$|
 ^action\s*type\s*id\s*=\s*\d+$|
 ^action_id:\s*\d+$|
@@ -196,7 +197,7 @@ exclude_pattern = re.compile(r'''
 ^flags\sId\s=\s\d+$|
 ^Steam\sstats\sstored$|
 ^Replacing\sawake\sobject\swith\sid\s.*$|
-^:\sTrade\saccepted$
+^:\sTrade\sAccepted.$
 ''', re.VERBOSE)
 
 # Print initial message
@@ -210,8 +211,6 @@ def logic(line):
     if exclude_pattern.match(line):
         # app.close_app()  # Close app if excluded line is detected
         return
-
-    print(repr(line))
     
     for target in TARGET_LINES:
         if target in line:
@@ -229,7 +228,6 @@ def logic(line):
                 notify_toast("You didn't defeat the mercenary yet!")
             app.set_state(True)  # Reset toggle when entering any hideout
 
-
     for house in MERCENARY_HOUSES:
         if house in line:
             if app:
@@ -239,12 +237,20 @@ def logic(line):
                 app.set_state(False)  
             break  # Stop checking once one match is found
 
+    # Just catch the names of the NPCs found
+    match = re.match(r"^(.+?), [^:]+: ", line)
+    if match:
+        name = match.group(1)
+        print(f"Matched NPC name: {name}")
+    else:
+        print(repr(line))
+
 if __name__ == "__main__":
     multiprocessing.freeze_support()
 
     # Create the GUI
     root = tk.Tk()
-    app = FloatingToggle(root, "resources\\on.png", "resources\\off.png", callback=lambda state: print("Toggled:", state))
+    app = FloatingToggle(root, "resources\\on.png", "resources\\off.png", callback=on_toggle)
 
     # Start log file monitor in a background thread
     threading.Thread(target=tail_file, args=(FILE_PATH,), daemon=True).start()
