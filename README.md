@@ -65,6 +65,30 @@ Python 3.11.8
 
 ---
 
+### 🔄 How to Update This Project
+
+#### 🔹 If you used Git (recommended):
+
+1. Open Command Prompt
+2. Go to the project folder:
+   ```bash
+   cd path\to\mercenary
+   ```
+3. Pull the latest version:
+   ```bash
+   git pull
+   ```
+#### 🔹 If you downloaded a ZIP file:
+
+1. Go to the GitHub page:
+👉 https://github.com/RyuFive/mercenary
+
+2. Click the green Code button → Download ZIP
+
+3. Extract the new version and replace the old folder
+4. 
+---
+
 ## 🎵 Resources
 
 Make sure these files are present in the same folder as the script:
